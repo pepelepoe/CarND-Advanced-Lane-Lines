@@ -8,7 +8,7 @@ pickle_data = pickle.load(open('wide_dist_pickle.p', 'rb'))
 mtx = pickle_data["mtx"]
 dist = pickle_data["dist"]
 
-img = cv2.imread('camera_cal/calibration5.jpg')
+img = cv2.imread('camera_cal/calibration1.jpg')
 imgSize = (img.shape[1], img.shape[0])
 
 # Do camera calibration given object points and image points
