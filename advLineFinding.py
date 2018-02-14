@@ -215,17 +215,27 @@ def find_lines(img):
     # Threshold color channel
     sbinary = color_transform_thresh(img, thresh_min=170, thresh_max=255)
 
+        # Threshold the L-channel of HLS
+    hls_l = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:,:,1]
+    binary_hls_l = np.zeros_like(hls_l)
+    binary_hls_l[(hls_l > 210) & (hls_l <= 255)] = 1
+
+    # Thresholds the B-channel of LAB
+    lab_b = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)[:,:,2]
+    binary_lab_b = np.zeros_like(lab_b)
+    binary_lab_b[(lab_b > 145) & (lab_b <= 255)] = 1
+
     # Stack each channel to view their individual contributions in green and blue respectively
     # This returns a stack of the two binary images, whose components you can see as different colors
-    color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, sbinary)) * 255
+    # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, sbinary, binary_hls_l, binary_lab_b )) * 255
 
     # Combine the two binary thresholds
     combined_binary = np.zeros_like(sxbinary)
-    combined_binary[(sbinary == 1) | (sxbinary == 1)] = 1
+    combined_binary[(sbinary == 1) | (sxbinary == 1) | (binary_hls_l == 1) | (binary_lab_b == 1) ] = 1
 
     # Uncomment to view binary image
-    # plt.imshow(combined_binary, cmap='gray')
-    # plt.show()
+    plt.imshow(combined_binary, cmap='gray')
+    plt.show()
 
     # Perform sliding window search, returns binary_warped image (bird's eye view)
     binary_warped, Minv = get_birds_eye(combined_binary)
@@ -276,6 +286,11 @@ def find_lines(img):
     plt.show()
     return result
 
-img = mpimg.imread('test_images/test1.jpg')
+img = mpimg.imread('captured_images/Pictures583.jpg')
+
+luv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
+plt.imshow(luv)
+plt.show()
+
 
 find_lines(img)
