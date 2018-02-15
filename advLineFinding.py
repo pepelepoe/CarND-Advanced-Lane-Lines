@@ -210,29 +210,49 @@ def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
 
 def find_lines(img):
     # Threshold x gradient
-    sxbinary = abs_sobel_thresh(img, orient='x', thresh_min=20, thresh_max=100)
+    sxbinary = abs_sobel_thresh(img, orient='x', thresh_min=50, thresh_max=100)
 
     # Threshold color channel
-    sbinary = color_transform_thresh(img, thresh_min=170, thresh_max=255)
-
+    # sbinary = color_transform_thresh(img, thresh_min=100, thresh_max=255)
+    #
         # Threshold the L-channel of HLS
-    hls_l = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:,:,1]
-    binary_hls_l = np.zeros_like(hls_l)
-    binary_hls_l[(hls_l > 210) & (hls_l <= 255)] = 1
+    # hls_l = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:,:,1]
+    # binary_hls_l = np.zeros_like(hls_l)
+    # binary_hls_l[(hls_l > 180) & (hls_l <= 255)] = 1
+    #
+    hsv_s = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,1]
+    binary_hsv_s = np.zeros_like(hsv_s)
+    binary_hsv_s[(hsv_s >= 200) & (hsv_s <= 255)] = 1
 
-    # Thresholds the B-channel of LAB
+    hsv_v = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,2]
+    binary_hsv_v = np.zeros_like(hsv_v)
+    binary_hsv_v[(hsv_v >= 100) & (hsv_v <= 255)] = 1
+    #
+    # # Thresholds the B-channel of LAB
     lab_b = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)[:,:,2]
     binary_lab_b = np.zeros_like(lab_b)
-    binary_lab_b[(lab_b > 145) & (lab_b <= 255)] = 1
+    binary_lab_b[(lab_b > 160) & (lab_b <= 255)] = 1
+    #
+    luv_l = cv2.cvtColor(img, cv2.COLOR_RGB2Luv)[:, :, 0]
+    binary_luv_l = np.zeros_like(luv_l)
+    binary_luv_l[(luv_l > 180) & (luv_l <= 255)] = 1
+    #
+    #
+    # # Stack each channel to view their individual contributions in green and blue respectively
+    # # This returns a stack of the two binary images, whose components you can see as different colors
+    # # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, sbinary, binary_hls_l, binary_lab_b )) * 255
+    #
+    # # Combine the two binary thresholds
+    # combined_binary = np.zeros_like(sxbinary)
+    # # combined_binary[(sbinary == 1) | (sxbinary == 1) | (binary_hls_l == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) ] = 1
+    # combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_hsv_s == 1) \
+    #                                | (binary_hsv_s == 1) ] = 1
+    combined_binary = np.zeros_like(binary_luv_l)
+    combined_binary[(binary_luv_l == 1) | (binary_lab_b == 1) | (sxbinary == 1) | (binary_hsv_s == 1) \
+                                        | (binary_hsv_s == 1) ] = 1
 
-    # Stack each channel to view their individual contributions in green and blue respectively
-    # This returns a stack of the two binary images, whose components you can see as different colors
-    # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, sbinary, binary_hls_l, binary_lab_b )) * 255
-
-    # Combine the two binary thresholds
-    combined_binary = np.zeros_like(sxbinary)
-    combined_binary[(sbinary == 1) | (sxbinary == 1) | (binary_hls_l == 1) | (binary_lab_b == 1) ] = 1
-
+    #
+    #
     # Uncomment to view binary image
     plt.imshow(combined_binary, cmap='gray')
     plt.show()
@@ -270,7 +290,7 @@ def find_lines(img):
     pts = np.hstack((pts_left, pts_right))
 
     # Draw the lane onto the warped blank image
-    cv2.fillPoly(color_warp, np.int_([pts]), (0,255, 0))
+    cv2.fillPoly(color_warp, np.int_([pts]), (255,0, 0))
 
     # Warp the blank back to original image space using inverse perspective matrix (Minv)
     newwarp = cv2.warpPerspective(color_warp, Minv, (img.shape[1], img.shape[0]))
@@ -286,11 +306,31 @@ def find_lines(img):
     plt.show()
     return result
 
-img = mpimg.imread('captured_images/Pictures583.jpg')
+# img = mpimg.imread('captured_images/Pictures583.jpg')
+# img = mpimg.imread('captured_images/Pictures616.jpg')
+# img = mpimg.imread('captured_images/Pictures1009.jpg')
+img = mpimg.imread('captured_images/Pictures1016.jpg')
 
-luv = cv2.cvtColor(img, cv2.COLOR_BGR2YUV)
-plt.imshow(luv)
-plt.show()
+
+# hsv_s = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,1]
+# binary_hsv_s = np.zeros_like(hsv_s)
+# binary_hsv_s[(hsv_s >= 120) & (hsv_s <= 255)] = 1
+#
+# hsv_v = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,2]
+# binary_hsv_v = np.zeros_like(hsv_v)
+# binary_hsv_v[(hsv_v >= 100) & (hsv_v <= 255)] = 1
+#
+# # Thresholds the B-channel of LAB
+# lab_b = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)[:,:,2]
+# binary_lab_b = np.zeros_like(lab_b)
+# binary_lab_b[(lab_b > 150) & (lab_b <= 255)] = 1
+#
+# luv_l = cv2.cvtColor(img, cv2.COLOR_RGB2Luv)[:, :, 0]
+# binary_luv_l = np.zeros_like(luv_l)
+# binary_luv_l[(luv_l > 135) & (luv_l <= 255)] = 1
+
+# plt.imshow(binary_luv_l, cmap = "gray")
+# plt.show()
 
 
 find_lines(img)
