@@ -111,23 +111,25 @@ def sliding_window_search(binary_warped):
     left_lane_bottom = left_fit_cr[0] * (y_eval * ym_per_pix) ** 2 + left_fit_cr[1] * (y_eval * ym_per_pix) + \
                         left_fit_cr[2]
 
+
     #calculate the x position for y at the height of the image for right lane
     right_lane_bottom = right_fit_cr[0] * (y_eval * ym_per_pix) ** 2 + right_fit_cr[1] * (y_eval * ym_per_pix) + \
                          right_fit_cr[2]
+    # print("right: " + str(right_fitx))
 
     #calculate the mid point of identified lane
-    lane_midpoint = float(right_lane_bottom - left_lane_bottom) / 2
+    lane_midpoint = float(right_fitx[0] + left_fitx[0]) / 2
 
     #calculate the image center in meters from left edge of the image to right edge of image
-    image_mid_point_in_meter = lane_midpoint * xm_per_pix;
+    # image_mid_point_in_meter = lane_midpoint * xm_per_pix;
 
-    lane_deviation = (image_mid_point_in_meter - lane_midpoint)
+    lane_deviation = np.absolute((y_eval - lane_midpoint)*xm_per_pix)
 
     # Now our radius of curvature is in meters
     print(left_curverad, 'm', right_curverad, 'm')
     # Example values: 632.1 m    626.2 m
 
-    print(image_mid_point_in_meter - img.shape[0]*xm_per_pix/2)
+    # print(image_mid_point_in_meter - img.shape[0]*xm_per_pix/2)
 
     print(lane_deviation, 'm')
 
@@ -212,6 +214,12 @@ def find_lines(img):
     # Threshold x gradient
     sxbinary = abs_sobel_thresh(img, orient='x', thresh_min=50, thresh_max=100)
 
+    R = img[:,:,0]
+    binary_r = np.zeros_like(R)
+    binary_r[(R > 100) & (R <= 255)] = 1
+
+
+
     # Threshold color channel
     # sbinary = color_transform_thresh(img, thresh_min=100, thresh_max=255)
     #
@@ -246,14 +254,15 @@ def find_lines(img):
     # # combined_binary[(sbinary == 1) | (sxbinary == 1) | (binary_hls_l == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) ] = 1
     # combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_hsv_s == 1) \
     #                                | (binary_hsv_s == 1) ] = 1
-    combined_binary = np.zeros_like(binary_hsv_s)
-    combined_binary[(binary_hsv_s == 1) | (sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1)] = 1
+    combined_binary = np.zeros_like(sxbinary)
+    combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_r == 1)] = 1
+    # combined_binary[(sxbinary == 1) | (binary_luv_l == 1)] = 1
 
     #
     #
     # Uncomment to view binary image
-    plt.imshow(combined_binary, cmap='gray')
-    plt.show()
+    # plt.imshow(combined_binary, cmap='gray')
+    # plt.show()
 
     # Perform sliding window search, returns binary_warped image (bird's eye view)
     binary_warped, Minv = get_birds_eye(combined_binary)
@@ -304,10 +313,14 @@ def find_lines(img):
     plt.show()
     return result
 
-img = mpimg.imread('captured_images/Pictures704.jpg')
+# img = mpimg.imread('captured_images/Pictures704.jpg')
 # img = mpimg.imread('captured_images/Pictures616.jpg')
 # img = mpimg.imread('captured_images/Pictures1009.jpg')
-# img = mpimg.imread('captured_images/Pictures1016.jpg')
+# img = mpimg.imread('captured_images/Pictures1004.jpg')
+# img = mpimg.imread('test_images/test7.jpg')
+img = mpimg.imread('test_images/test2.jpg')
+
+
 
 
 # hsv_s = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,1]
