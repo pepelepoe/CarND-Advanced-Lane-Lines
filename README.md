@@ -124,3 +124,5 @@ I think I need to improve the way I calculated the radius of curvature and the p
 
 #TODO:
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
+
+For my approach, I created a function called find_lines which takes an input image and runs the project pipeline. I start the pipeline with thresholding where I used a combination of gradient x thresholding with color transforms. For the latter I implemented a 

@@ -255,7 +255,7 @@ def find_lines(img):
     # combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_hsv_s == 1) \
     #                                | (binary_hsv_s == 1) ] = 1
     combined_binary = np.zeros_like(sxbinary)
-    combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_r == 1)] = 1
+    combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1)] = 1
     # combined_binary[(sxbinary == 1) | (binary_luv_l == 1)] = 1
 
     #
@@ -316,9 +316,9 @@ def find_lines(img):
 # img = mpimg.imread('captured_images/Pictures704.jpg')
 # img = mpimg.imread('captured_images/Pictures616.jpg')
 # img = mpimg.imread('captured_images/Pictures1009.jpg')
-# img = mpimg.imread('captured_images/Pictures1004.jpg')
+img = mpimg.imread('captured_images/Pictures1003.jpg')
 # img = mpimg.imread('test_images/test7.jpg')
-img = mpimg.imread('test_images/test2.jpg')
+# img = mpimg.imread('test_images/test2.jpg')
 
 
 
