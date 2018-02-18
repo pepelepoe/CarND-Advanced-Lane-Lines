@@ -277,7 +277,9 @@ def find_lines(img):
     # plt.show()
 
     # Perform sliding window search to identify lane lines
-    left_fitx, right_fitx, ploty, left_curverad, right_curverad, lane_deviation = sliding_window_search(binary_warped)
+    left_fitx, right_fitx, \
+    ploty, left_curverad, \
+    right_curverad, lane_deviation = sliding_window_search(binary_warped)
 
     # Load camera calibration data
     pickle_data = pickle.load(open('wide_dist_pickle.p', 'rb'))
@@ -313,35 +315,7 @@ def find_lines(img):
     plt.show()
     return result
 
-# img = mpimg.imread('captured_images/Pictures704.jpg')
-# img = mpimg.imread('captured_images/Pictures616.jpg')
-# img = mpimg.imread('captured_images/Pictures1009.jpg')
-img = mpimg.imread('captured_images/Pictures1003.jpg')
-# img = mpimg.imread('test_images/test7.jpg')
-# img = mpimg.imread('test_images/test2.jpg')
 
-
-
-
-# hsv_s = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,1]
-# binary_hsv_s = np.zeros_like(hsv_s)
-# binary_hsv_s[(hsv_s >= 120) & (hsv_s <= 255)] = 1
-#
-# hsv_v = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,2]
-# binary_hsv_v = np.zeros_like(hsv_v)
-# binary_hsv_v[(hsv_v >= 100) & (hsv_v <= 255)] = 1
-#
-# # Thresholds the B-channel of LAB
-# lab_b = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)[:,:,2]
-# binary_lab_b = np.zeros_like(lab_b)
-# binary_lab_b[(lab_b > 150) & (lab_b <= 255)] = 1
-#
-# luv_l = cv2.cvtColor(img, cv2.COLOR_RGB2Luv)[:, :, 0]
-# binary_luv_l = np.zeros_like(luv_l)
-# binary_luv_l[(luv_l > 135) & (luv_l <= 255)] = 1
-
-# plt.imshow(binary_luv_l, cmap = "gray")
-# plt.show()
-
+img = mpimg.imread('captured/40.1.jpg')
 
 find_lines(img)
