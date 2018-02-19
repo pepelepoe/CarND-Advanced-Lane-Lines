@@ -20,12 +20,12 @@ The goals / steps of this project are the following:
 [//]: # (Image References)
 
 [image1]: ./output_images/camera_undistorted.png "Undistorted"
-[image2]: ./test_images/test1.jpg "Road Transformed"
+[image2]: ./test_images/test2.jpg "Road Transformed"
 [image3]: ./output_images/binary_combination.png "Binary Example"
 [image4]: ./output_images/perspectivetransform.png "Warp Example"
 [image5]: ./output_images/lane-pixels-fit.jpg "Fit Visual"
 [image6]: ./output_images/find_lines_output.jpg "Output"
-[video1]: ./output_images/output.mp4 "Video"
+[video1]: ./output.mp4 "Video"
 
 ## [Rubric](https://review.udacity.com/#!/rubrics/571/view) Points
 
@@ -113,16 +113,18 @@ I implemented this step in lines 246 through 273 in `find_lines()` function on `
 #### 1. Provide a link to your final video output.  Your pipeline should perform reasonably well on the entire project video (wobbly lines are ok but no catastrophic failures that would cause the car to drive off the road!).
 
 <!-- Here's a [link to my video result](./project_video.mp4) -->
-
+See 'output.mp4'
+![alt text][video1]
 ---
 
 ### Discussion
 
 #### 1. Briefly discuss any problems / issues you faced in your implementation of this project.  Where will your pipeline likely fail?  What could you do to make it more robust?
 
-I think I need to improve the way I calculated the radius of curvature and the position of the vehicle with respect to center.
-
-#TODO:
 Here I'll talk about the approach I took, what techniques I used, what worked and why, where the pipeline might fail and how I might improve it if I were going to pursue this project further.  
 
-For my approach, I created a function called find_lines which takes an input image and runs the project pipeline. I start the pipeline with image thresholding where I used a combination of Sobel x gradient thresholding with color transforms. For the latter I implemented L of CIELUV color and B of CIELAB color space. After thresholding, binary image is warped by `get_birds_eye()` function. In this function I harcoded appropriate source and destination points which I then used to obtain a perspective transform matrix with `perspective_transform()` function. I then input this matrix into `warp_perspective()` which returns a warped binary image or bird's eye view. This bird's eye view will be helpful in order to fit polynomial to lane lines 
+For my approach, I created a function called `find_lines()` which takes an input image and runs the project pipeline. I start the pipeline with image thresholding where I used a combination of Sobel x gradient thresholding with color transforms. For the latter I implemented L of CIELUV color and B of CIELAB color space. After thresholding, binary image is warped by `get_birds_eye()` function. In this function I harcoded appropriate source and destination points which I then used to obtain a perspective transform matrix with `perspective_transform()` function. I then input this matrix into `warp_perspective()` which returns a warped binary image or bird's eye view. This bird's eye view will be helpful for calculating the curvature of the lane line. With this binary warped I can call `sliding_window_search()` function. In this function I calculate a histogram and obtain the lane indices that I use to fit polynomials to. With this function I also calculate curvature and lane deviation from center. After this function returns all of these values I load pickle data calculated with calibration images which I use to undistort binary warped image and draw the lane shape.
+
+When I started this project the toughest challenge was to find the appropriate thresholding combination and threshold values for each technique. I started with a mostly gradient thresholding using Sobel in x and y, with magnitude and direction, which worked fine for detecting white content on images but was not a suitable approach during bridges which are white, when cars passed next to the lane, or in shades under trees. As suggested by the reviewer, I changed thresholding to depend more on color identification rather than gradients. This proved instrumental in order to properly detect lines during changing road conditions such as during car crossing bridges. The thresholded values were tweaked by first using the `extract_frames()` function to extract individual frames where pipeline failed and seeing how lowering or raising values changed performance of techniques.
+
+The pipeline will most likely fail outside of a road where there are not so many line markings. It could be improved by using more color spaces and better checks to determine when to apply these transformations. Pipeline can also be improved by averaging frames in order to get smoother results for lane polyfill, curvature and lane deviation. Another improvement would be to determine the source and destination points for perspective transform based on the dimensions of the image rather than using hardcoded values.

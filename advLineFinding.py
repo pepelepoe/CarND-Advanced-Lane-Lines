@@ -168,7 +168,7 @@ def get_birds_eye(binary_img):
     dst_pts = np.array([bottom_left_dst, bottom_right_dst, top_right_dst, top_left_dst])
 
     # you can plot this and see that lines are properly chosen
-    # cv2.polylines(bin_img,[pts],True,(255,0,0), 2)
+    cv2.polylines(binary_img,[pts],True,(255,0,0), 2)
     # cv2.polylines(img,[dst_pts],True,(0,0,255), 5)
 
     src = np.float32(pts.tolist())
@@ -177,19 +177,11 @@ def get_birds_eye(binary_img):
     img_size = (binary_img.shape[1], binary_img.shape[0])
 
     M, Minv = perspective_transform(src, dst)
+
     binary_warped = warp_perspective(binary_img, M)
 
     # binary_warped = cv2.warpPerspective(img, M, img_size , flags=cv2.INTER_LINEAR)
     return binary_warped, Minv
-
-def color_transform_thresh(img, thresh_min=0, thresh_max=255):
-    # Convert image to HLS
-    hls = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)
-    s_channel = hls[:,:,2]
-
-    s_binary = np.zeros_like(s_channel)
-    s_binary[(s_channel >= thresh_min) & (s_channel <= thresh_max)] = 1
-    return s_binary
 
 def abs_sobel_thresh(img, orient='x', thresh_min=0, thresh_max=255):
     # Convert to grayscale
@@ -214,52 +206,40 @@ def find_lines(img):
     # Threshold x gradient
     sxbinary = abs_sobel_thresh(img, orient='x', thresh_min=50, thresh_max=100)
 
-    R = img[:,:,0]
-    binary_r = np.zeros_like(R)
-    binary_r[(R > 100) & (R <= 255)] = 1
-
-
-
-    # Threshold color channel
     # sbinary = color_transform_thresh(img, thresh_min=100, thresh_max=255)
-    #
+
     # Threshold the L-channel of HLS
     hls_l = cv2.cvtColor(img, cv2.COLOR_RGB2HLS)[:,:,1]
     binary_hls_l = np.zeros_like(hls_l)
     binary_hls_l[(hls_l > 180) & (hls_l <= 255)] = 1
 
+    # Threshold the S-channel of HSV
     hsv_s = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,1]
     binary_hsv_s = np.zeros_like(hsv_s)
     binary_hsv_s[(hsv_s >= 180) & (hsv_s <= 255)] = 1
 
+    # Threshold the V-channel of HSV
     hsv_v = cv2.cvtColor(img, cv2.COLOR_RGB2HSV)[:,:,2]
     binary_hsv_v = np.zeros_like(hsv_v)
     binary_hsv_v[(hsv_v >= 180) & (hsv_v <= 255)] = 1
+
     # Thresholds the B-channel of LAB
     lab_b = cv2.cvtColor(img, cv2.COLOR_RGB2Lab)[:,:,2]
     binary_lab_b = np.zeros_like(lab_b)
     binary_lab_b[(lab_b > 160) & (lab_b <= 255)] = 1
-    #
+
+    # Thresholds the L-channel of LUV
     luv_l = cv2.cvtColor(img, cv2.COLOR_RGB2Luv)[:, :, 0]
     binary_luv_l = np.zeros_like(luv_l)
     binary_luv_l[(luv_l > 200) & (luv_l <= 255)] = 1
-    #
-    #
+
     # # Stack each channel to view their individual contributions in green and blue respectively
     # # This returns a stack of the two binary images, whose components you can see as different colors
     # # color_binary = np.dstack(( np.zeros_like(sxbinary), sxbinary, sbinary, binary_hls_l, binary_lab_b )) * 255
     #
-    # # Combine the two binary thresholds
-    # combined_binary = np.zeros_like(sxbinary)
-    # # combined_binary[(sbinary == 1) | (sxbinary == 1) | (binary_hls_l == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) ] = 1
-    # combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1) | (binary_hsv_s == 1) \
-    #                                | (binary_hsv_s == 1) ] = 1
     combined_binary = np.zeros_like(sxbinary)
     combined_binary[(sxbinary == 1) | (binary_lab_b == 1) | (binary_luv_l == 1)] = 1
-    # combined_binary[(sxbinary == 1) | (binary_luv_l == 1)] = 1
 
-    #
-    #
     # Uncomment to view binary image
     # plt.imshow(combined_binary, cmap='gray')
     # plt.show()
@@ -268,13 +248,13 @@ def find_lines(img):
     binary_warped, Minv = get_birds_eye(combined_binary)
 
     # Plotting thresholded images
-    # f, (ax1, ax2) = plt.subplots(1, 2, figsize=(20,10))
-    # ax1.set_title('Original Image')
-    # ax1.imshow(img)
-    #
-    # ax2.set_title('Birds-eye-view')
-    # ax2.imshow(combined_binary, cmap='gray')
-    # plt.show()
+    f, (ax1, ax2) = plt.subplots(1, 2, figsize=(20,10))
+    ax1.set_title('Original Image')
+    ax1.imshow(img)
+
+    ax2.set_title('Birds-eye-view')
+    ax2.imshow(binary_warped, cmap='gray')
+    plt.show()
 
     # Perform sliding window search to identify lane lines
     left_fitx, right_fitx, \
@@ -316,6 +296,8 @@ def find_lines(img):
     return result
 
 
-img = mpimg.imread('captured/40.1.jpg')
+# img = mpimg.imread('captured/40.1.jpg')
+img = mpimg.imread('test_images/test2.jpg')
+
 
 find_lines(img)
